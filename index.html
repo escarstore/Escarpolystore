@@ -1,0 +1,1879 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EscarPolystore</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --green: #1a6b3a;
+  --green-light: #2d9e58;
+  --green-dark: #0e4523;
+  --gold: #c9a227;
+  --gold-light: #f0c94d;
+  --black: #111111;
+  --white: #fafafa;
+  --gray: #f4f4f0;
+  --text: #222;
+  --muted: #777;
+  --border: #e0ddd5;
+  --shadow: 0 4px 24px rgba(0,0,0,0.10);
+  --wa-green: #25D366;
+  --wa-dark: #128C7E;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'DM Sans', sans-serif; background: var(--white); color: var(--text); min-height: 100vh; }
+
+/* PAGES */
+.page { display: none; }
+.page.active { display: block; }
+#page-landing.active { display: flex; }
+
+/* ===== PAGE 1: LANDING ===== */
+#page-landing {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #0e4523 0%, #1a6b3a 50%, #2d9e58 100%);
+  flex-direction: column;
+}
+.landing-nav {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 22px 48px;
+  border-bottom: 1px solid rgba(255,255,255,0.12);
+}
+.logo {
+  font-family: 'Playfair Display', serif;
+  color: var(--gold-light);
+  font-size: 2rem;
+  letter-spacing: 1px;
+}
+.logo span { color: #fff; font-weight: 400; font-size: 1rem; display: block; letter-spacing: 3px; text-transform: uppercase; }
+.nav-links { display: flex; gap: 14px; }
+.nav-btn {
+  padding: 10px 28px;
+  border-radius: 50px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: 2px solid var(--gold-light);
+}
+.nav-btn.outline { background: transparent; color: var(--gold-light); }
+.nav-btn.outline:hover { background: var(--gold-light); color: var(--green-dark); }
+.nav-btn.filled { background: var(--gold-light); color: var(--green-dark); }
+.nav-btn.filled:hover { background: #fff; border-color: #fff; }
+
+.landing-hero {
+  flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  text-align: center; padding: 60px 24px;
+}
+.hero-badge {
+  background: rgba(255,255,255,0.12);
+  color: var(--gold-light);
+  border: 1px solid var(--gold-light);
+  border-radius: 50px;
+  padding: 6px 20px;
+  font-size: 0.78rem;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  margin-bottom: 28px;
+}
+.hero-title {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(2.8rem, 6vw, 5.5rem);
+  color: #fff;
+  line-height: 1.1;
+  margin-bottom: 24px;
+}
+.hero-title em { color: var(--gold-light); font-style: italic; }
+.hero-para {
+  max-width: 600px;
+  color: rgba(255,255,255,0.82);
+  font-size: 1.08rem;
+  line-height: 1.75;
+  margin-bottom: 44px;
+}
+.hero-cta { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+.cta-btn {
+  padding: 15px 38px;
+  border-radius: 50px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: 2px solid transparent;
+  font-family: 'DM Sans', sans-serif;
+}
+.cta-primary { background: var(--gold-light); color: var(--green-dark); }
+.cta-primary:hover { background: #fff; transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.2); }
+.cta-secondary { background: transparent; color: #fff; border-color: rgba(255,255,255,0.5); }
+.cta-secondary:hover { background: rgba(255,255,255,0.1); }
+
+.features-row {
+  display: flex; justify-content: center; gap: 32px; flex-wrap: wrap;
+  padding: 32px 48px;
+  border-top: 1px solid rgba(255,255,255,0.12);
+}
+.feat-item { display: flex; align-items: center; gap: 10px; color: rgba(255,255,255,0.75); font-size: 0.9rem; }
+.feat-icon { font-size: 1.3rem; }
+
+/* ===== AUTH MODALS ===== */
+.modal-overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.55); z-index: 2000;
+  align-items: center; justify-content: center;
+}
+.modal-overlay.open { display: flex; }
+.modal-box {
+  background: #fff; border-radius: 20px;
+  width: 100%; max-width: 440px;
+  padding: 40px 36px;
+  position: relative;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+  max-height: 92vh; overflow-y: auto;
+}
+.modal-box h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.7rem; margin-bottom: 6px; color: var(--green-dark);
+}
+.modal-box p { color: var(--muted); font-size: 0.9rem; margin-bottom: 26px; }
+.form-group { margin-bottom: 18px; }
+.form-group label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 7px; color: var(--text); }
+.form-group input {
+  width: 100%; padding: 12px 16px;
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  font-size: 0.97rem;
+  font-family: 'DM Sans', sans-serif;
+  outline: none; transition: border 0.2s;
+}
+.form-group input:focus { border-color: var(--green); }
+.submit-btn {
+  width: 100%; padding: 13px;
+  background: var(--green);
+  color: #fff;
+  border: none; border-radius: 10px;
+  font-size: 1rem; font-weight: 600;
+  cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  transition: background 0.2s;
+  margin-top: 4px;
+}
+.submit-btn:hover { background: var(--green-dark); }
+.modal-switch { text-align: center; margin-top: 16px; font-size: 0.9rem; color: var(--muted); }
+.modal-switch a { color: var(--green); text-decoration: none; font-weight: 600; cursor: pointer; }
+.close-modal {
+  position: absolute; top: 14px; right: 18px;
+  font-size: 1.4rem; cursor: pointer; color: var(--muted);
+  background: none; border: none;
+}
+
+/* Social auth divider */
+.auth-divider {
+  display: flex; align-items: center; gap: 12px;
+  margin: 20px 0;
+  color: var(--muted); font-size: 0.85rem;
+}
+.auth-divider::before, .auth-divider::after {
+  content: ''; flex: 1; height: 1px; background: var(--border);
+}
+
+/* Social login buttons */
+.social-btns { display: flex; flex-direction: column; gap: 12px; margin-bottom: 4px; }
+.social-btn {
+  width: 100%; padding: 12px 16px;
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  font-size: 0.95rem; font-weight: 600;
+  cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  background: #fff;
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  transition: all 0.2s;
+  color: var(--text);
+}
+.social-btn:hover { border-color: var(--green); background: #f8fff9; }
+.social-btn.google-btn:hover { border-color: #4285F4; }
+.social-btn.tiktok-btn:hover { border-color: #000; }
+.social-btn svg { width: 20px; height: 20px; flex-shrink: 0; }
+
+/* ===== PAGE 2: SHOP ===== */
+#page-shop { min-height: 100vh; background: var(--gray); }
+.shop-header {
+  background: var(--green-dark);
+  padding: 0 48px;
+  display: flex; align-items: center; justify-content: space-between;
+  height: 68px;
+  position: sticky; top: 0; z-index: 100;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.18);
+}
+.shop-header .logo { font-size: 1.4rem; }
+.shop-header .logo span { display: none; }
+.header-right { display: flex; align-items: center; gap: 14px; }
+.user-badge {
+  background: rgba(255,255,255,0.12);
+  color: var(--gold-light);
+  padding: 6px 18px; border-radius: 50px;
+  font-size: 0.85rem; font-weight: 600;
+}
+.logout-btn {
+  background: transparent; color: rgba(255,255,255,0.7);
+  border: 1px solid rgba(255,255,255,0.3);
+  padding: 6px 16px; border-radius: 50px;
+  font-size: 0.82rem; cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+}
+.logout-btn:hover { color: #fff; border-color: #fff; }
+.cart-btn {
+  background: var(--gold-light); color: var(--green-dark);
+  border: none; padding: 8px 20px; border-radius: 50px;
+  font-weight: 700; cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.9rem;
+  transition: background 0.2s;
+}
+.cart-btn:hover { background: #fff; }
+
+/* WhatsApp share button */
+.wa-share-btn {
+  background: var(--wa-green); color: #fff;
+  border: none; padding: 8px 16px; border-radius: 50px;
+  font-weight: 600; cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.85rem;
+  display: flex; align-items: center; gap: 6px;
+  transition: background 0.2s;
+}
+.wa-share-btn:hover { background: var(--wa-dark); }
+
+.shop-hero {
+  background: linear-gradient(135deg, var(--green) 0%, var(--green-dark) 100%);
+  padding: 54px 48px;
+  text-align: center;
+}
+.shop-hero h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(1.8rem, 4vw, 3rem);
+  color: #fff; margin-bottom: 10px;
+}
+.shop-hero h1 em { color: var(--gold-light); font-style: italic; }
+.shop-hero p { color: rgba(255,255,255,0.75); font-size: 1rem; }
+
+/* Category Grid */
+.categories-section { padding: 52px 48px; max-width: 1100px; margin: 0 auto; }
+.section-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.6rem; color: var(--green-dark);
+  margin-bottom: 8px;
+}
+.section-sub { color: var(--muted); font-size: 0.92rem; margin-bottom: 32px; }
+.cat-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 18px;
+}
+.cat-card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 32px 16px 24px;
+  text-align: center;
+  cursor: pointer;
+  border: 2.5px solid transparent;
+  transition: all 0.22s;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+}
+.cat-card:hover, .cat-card.active {
+  border-color: var(--green);
+  transform: translateY(-4px);
+  box-shadow: 0 10px 28px rgba(26,107,58,0.15);
+}
+.cat-icon {
+  width: 52px; height: 52px;
+  border-radius: 50%;
+  margin: 0 auto 14px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.5rem;
+}
+.cat-name {
+  font-weight: 700; font-size: 1.05rem;
+  color: var(--green-dark);
+}
+
+/* Subcategory Panel */
+.subcat-panel {
+  background: #fff;
+  border-radius: 20px;
+  padding: 36px 40px;
+  margin: 0 48px 28px;
+  box-shadow: var(--shadow);
+  max-width: 1004px;
+  margin-left: auto; margin-right: auto;
+}
+.subcat-panel h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.3rem; color: var(--green-dark); margin-bottom: 20px;
+}
+.subcat-grid { display: flex; flex-wrap: wrap; gap: 12px; }
+.subcat-btn {
+  padding: 10px 26px;
+  border-radius: 50px;
+  border: 2px solid var(--green);
+  color: var(--green);
+  background: transparent;
+  font-weight: 600; font-size: 0.9rem;
+  cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  transition: all 0.18s;
+}
+.subcat-btn:hover, .subcat-btn.active {
+  background: var(--green); color: #fff;
+}
+
+/* Product Table Panel */
+.product-panel {
+  background: #fff;
+  border-radius: 20px;
+  padding: 36px 40px;
+  margin: 0 48px 48px;
+  box-shadow: var(--shadow);
+  max-width: 1004px;
+  margin-left: auto; margin-right: auto;
+}
+.product-panel h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.3rem; color: var(--green-dark); margin-bottom: 4px;
+}
+.product-panel p { color: var(--muted); font-size: 0.88rem; margin-bottom: 22px; }
+table { width: 100%; border-collapse: collapse; }
+thead tr { background: var(--green-dark); color: #fff; }
+th { padding: 12px 16px; text-align: left; font-size: 0.88rem; letter-spacing: 0.5px; }
+td { padding: 13px 16px; border-bottom: 1px solid var(--border); font-size: 0.95rem; }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: #f9f9f6; }
+.qty-control { display: flex; align-items: center; gap: 10px; }
+.qty-btn {
+  width: 30px; height: 30px;
+  border-radius: 50%; border: 2px solid var(--green);
+  background: transparent; color: var(--green);
+  font-size: 1.1rem; font-weight: 700;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: all 0.15s;
+}
+.qty-btn:hover { background: var(--green); color: #fff; }
+.qty-val { font-weight: 700; min-width: 28px; text-align: center; font-size: 1rem; }
+.total-cell { font-weight: 700; color: var(--green-dark); font-size: 1rem; }
+.order-btn {
+  margin-top: 22px;
+  padding: 13px 38px;
+  background: var(--green);
+  color: #fff; border: none;
+  border-radius: 50px;
+  font-size: 1rem; font-weight: 700;
+  cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  transition: background 0.2s;
+}
+.order-btn:hover { background: var(--green-dark); }
+
+/* ===== PAGE 3: CART ===== */
+#page-cart { min-height: 100vh; background: var(--gray); }
+.cart-section { max-width: 900px; margin: 0 auto; padding: 48px 24px; }
+.back-link {
+  display: inline-flex; align-items: center; gap: 8px;
+  color: var(--green); font-weight: 600; cursor: pointer;
+  margin-bottom: 28px; text-decoration: none; font-size: 0.95rem;
+}
+.cart-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 2rem; color: var(--green-dark); margin-bottom: 28px;
+}
+.cart-box {
+  background: #fff; border-radius: 20px;
+  padding: 32px; box-shadow: var(--shadow);
+  margin-bottom: 20px;
+}
+.cart-box h3 { font-family: 'Playfair Display', serif; font-size: 1.2rem; color: var(--green-dark); margin-bottom: 18px; }
+.receipt-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 0.95rem; }
+.receipt-row:last-child { border-bottom: none; }
+.receipt-row.total { font-weight: 700; font-size: 1.1rem; color: var(--green-dark); padding-top: 14px; }
+.user-info-row { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 18px; }
+.info-chip {
+  background: var(--gray);
+  padding: 6px 16px; border-radius: 50px;
+  font-size: 0.85rem; color: var(--muted);
+}
+.info-chip strong { color: var(--text); }
+.grand-total-box {
+  background: var(--green-dark); color: #fff;
+  border-radius: 16px; padding: 20px 28px;
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 24px;
+}
+.grand-total-box span:first-child { font-size: 1rem; opacity: 0.8; }
+.grand-total-box span:last-child { font-size: 1.6rem; font-weight: 700; font-family: 'Playfair Display', serif; color: var(--gold-light); }
+.make-order-btn {
+  width: 100%; padding: 15px;
+  background: var(--gold);
+  color: #fff; border: none;
+  border-radius: 50px;
+  font-size: 1.05rem; font-weight: 700;
+  cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  transition: background 0.2s;
+  margin-bottom: 16px;
+}
+.make-order-btn:hover { background: var(--gold-light); color: var(--green-dark); }
+.wa-cart-share {
+  width: 100%; padding: 14px;
+  background: var(--wa-green); color: #fff;
+  border: none; border-radius: 50px;
+  font-size: 1rem; font-weight: 700;
+  cursor: pointer; font-family: 'DM Sans', sans-serif;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  transition: background 0.2s;
+  margin-bottom: 28px;
+}
+.wa-cart-share:hover { background: var(--wa-dark); }
+
+/* ===== PAGE 4: PAYMENT ===== */
+#page-payment { min-height: 100vh; background: var(--gray); }
+.payment-section { max-width: 520px; margin: 0 auto; padding: 48px 24px; }
+.payment-title { font-family: 'Playfair Display', serif; font-size: 2rem; color: var(--green-dark); margin-bottom: 6px; }
+.payment-sub { color: var(--muted); margin-bottom: 32px; }
+.pay-options { display: flex; flex-direction: column; gap: 14px; margin-bottom: 28px; }
+.pay-option {
+  background: #fff; border-radius: 14px;
+  padding: 18px 22px;
+  border: 2px solid var(--border);
+  cursor: pointer;
+  display: flex; align-items: center; gap: 16px;
+  transition: all 0.18s;
+}
+.pay-option:hover, .pay-option.selected { border-color: var(--green); box-shadow: 0 4px 16px rgba(26,107,58,0.1); }
+.pay-icon { font-size: 1.8rem; width: 44px; text-align: center; }
+.pay-name { font-weight: 700; font-size: 1rem; color: var(--green-dark); }
+.pay-detail { font-size: 0.82rem; color: var(--muted); margin-top: 2px; }
+
+.payment-form-area { margin-top: 8px; }
+.pay-input {
+  width: 100%; padding: 13px 16px;
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  font-size: 0.97rem;
+  font-family: 'DM Sans', sans-serif;
+  margin-bottom: 14px;
+  outline: none; transition: border 0.2s;
+}
+.pay-input:focus { border-color: var(--green); }
+.confirm-pay-btn {
+  width: 100%; padding: 14px;
+  background: var(--green); color: #fff;
+  border: none; border-radius: 50px;
+  font-size: 1rem; font-weight: 700;
+  cursor: pointer; font-family: 'DM Sans', sans-serif;
+  transition: background 0.2s;
+}
+.confirm-pay-btn:hover { background: var(--green-dark); }
+
+
+
+/* ===== PAGE 6: ADMIN DASHBOARD ===== */
+#page-admin { min-height: 100vh; background: #1a1a2e; }
+.admin-sidebar {
+  position: fixed; left: 0; top: 0; bottom: 0;
+  width: 240px;
+  background: #0f0f1e;
+  padding: 28px 0;
+  display: flex; flex-direction: column;
+}
+.admin-logo {
+  font-family: 'Playfair Display', serif;
+  color: var(--gold-light);
+  font-size: 1.3rem;
+  padding: 0 24px 28px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  margin-bottom: 24px;
+}
+.admin-logo small { display: block; color: rgba(255,255,255,0.4); font-size: 0.68rem; letter-spacing: 2px; text-transform: uppercase; font-family: 'DM Sans', sans-serif; margin-top: 3px; }
+.admin-nav { flex: 1; }
+.admin-nav-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 13px 24px;
+  color: rgba(255,255,255,0.55);
+  cursor: pointer;
+  transition: all 0.18s;
+  font-size: 0.9rem; font-weight: 500;
+  border-left: 3px solid transparent;
+}
+.admin-nav-item:hover, .admin-nav-item.active {
+  color: #fff;
+  background: rgba(255,255,255,0.06);
+  border-left-color: var(--gold-light);
+}
+.admin-nav-item span { font-size: 1.1rem; }
+.admin-main {
+  margin-left: 240px;
+  padding: 36px 40px;
+  min-height: 100vh;
+}
+.admin-topbar {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 36px;
+}
+.admin-topbar h1 {
+  font-family: 'Playfair Display', serif;
+  color: #fff; font-size: 1.7rem;
+}
+.admin-topbar-right { display: flex; align-items: center; gap: 14px; }
+.admin-user { color: rgba(255,255,255,0.65); font-size: 0.88rem; }
+.admin-logout {
+  background: rgba(255,255,255,0.08);
+  color: rgba(255,255,255,0.7);
+  border: 1px solid rgba(255,255,255,0.15);
+  padding: 7px 18px; border-radius: 50px;
+  font-size: 0.82rem; cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+}
+
+.stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 32px; }
+.stat-card {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 16px; padding: 24px 22px;
+}
+.stat-label { color: rgba(255,255,255,0.5); font-size: 0.78rem; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 10px; }
+.stat-value { font-size: 1.9rem; font-weight: 700; color: var(--gold-light); font-family: 'Playfair Display', serif; }
+.stat-sub { color: rgba(255,255,255,0.35); font-size: 0.78rem; margin-top: 4px; }
+
+.admin-section { margin-bottom: 36px; }
+.admin-section-title {
+  font-family: 'Playfair Display', serif;
+  color: #fff; font-size: 1.2rem; margin-bottom: 18px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+.admin-table-wrap { overflow-x: auto; border-radius: 14px; }
+.admin-table { width: 100%; border-collapse: collapse; }
+.admin-table thead tr { background: rgba(255,255,255,0.07); }
+.admin-table th { padding: 13px 16px; text-align: left; font-size: 0.8rem; color: rgba(255,255,255,0.5); letter-spacing: 0.5px; text-transform: uppercase; font-weight: 600; }
+.admin-table td { padding: 13px 16px; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 0.9rem; color: rgba(255,255,255,0.75); }
+.admin-table tr:hover td { background: rgba(255,255,255,0.03); }
+.status-badge {
+  padding: 4px 12px; border-radius: 50px;
+  font-size: 0.75rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.5px;
+}
+.status-pending { background: rgba(255,193,7,0.15); color: #ffc107; }
+.status-confirmed { background: rgba(45,158,88,0.15); color: #2d9e58; }
+.status-delivered { background: rgba(100,181,246,0.15); color: #64b5f6; }
+.reply-btn {
+  background: var(--green); color: #fff;
+  border: none; padding: 6px 16px;
+  border-radius: 50px; font-size: 0.8rem;
+  cursor: pointer; font-family: 'DM Sans', sans-serif;
+  font-weight: 600;
+}
+.reply-btn:hover { background: var(--green-light); }
+.delete-btn {
+  background: rgba(255,80,80,0.15); color: #ff6b6b;
+  border: 1px solid rgba(255,80,80,0.3); padding: 6px 14px;
+  border-radius: 50px; font-size: 0.78rem;
+  cursor: pointer; font-family: 'DM Sans', sans-serif;
+  font-weight: 600; margin-left: 6px;
+  transition: all 0.18s;
+}
+.delete-btn:hover { background: #ff4444; color: #fff; border-color: #ff4444; }
+.wa-notify-btn {
+  background: var(--wa-green); color: #fff;
+  border: none; padding: 6px 14px;
+  border-radius: 50px; font-size: 0.78rem;
+  cursor: pointer; font-family: 'DM Sans', sans-serif;
+  font-weight: 600; margin-left: 6px;
+  display: inline-flex; align-items: center; gap: 4px;
+}
+.wa-notify-btn:hover { background: var(--wa-dark); }
+
+/* REPLY MODAL */
+.reply-modal-box { max-width: 480px; }
+.reply-textarea {
+  width: 100%; height: 100px; padding: 12px;
+  border: 1.5px solid var(--border); border-radius: 10px;
+  font-family: 'DM Sans', sans-serif; font-size: 0.95rem;
+  resize: none; outline: none; margin-bottom: 14px;
+}
+.reply-textarea:focus { border-color: var(--green); }
+
+/* WhatsApp floating button on landing */
+.wa-float {
+  position: fixed; bottom: 28px; right: 28px;
+  background: var(--wa-green); color: #fff;
+  border: none; border-radius: 50px;
+  padding: 14px 22px;
+  font-size: 1rem; font-weight: 700;
+  cursor: pointer; font-family: 'DM Sans', sans-serif;
+  box-shadow: 0 6px 24px rgba(37,211,102,0.4);
+  display: flex; align-items: center; gap: 8px;
+  z-index: 800; transition: all 0.2s;
+  animation: waPulse 2.5s infinite;
+  width: auto; max-width: 220px;
+  pointer-events: auto;
+}
+.wa-float:hover { background: var(--wa-dark); transform: scale(1.05); }
+@keyframes waPulse {
+  0%, 100% { box-shadow: 0 6px 24px rgba(37,211,102,0.4); }
+  50% { box-shadow: 0 6px 36px rgba(37,211,102,0.65); }
+}
+
+/* FOOTER */
+footer {
+  background: var(--green-dark);
+  color: rgba(255,255,255,0.75);
+  padding: 48px 48px 24px;
+}
+.footer-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 36px; margin-bottom: 36px; }
+.footer-col h4 { color: var(--gold-light); font-size: 0.85rem; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 14px; }
+.footer-col p, .footer-col a { font-size: 0.88rem; line-height: 1.9; color: rgba(255,255,255,0.65); text-decoration: none; display: block; }
+.footer-col a:hover { color: var(--gold-light); }
+.footer-logo { font-family: 'Playfair Display', serif; font-size: 1.6rem; color: var(--gold-light); margin-bottom: 12px; }
+.footer-bottom { border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px; text-align: center; font-size: 0.82rem; color: rgba(255,255,255,0.4); }
+
+/* ADMIN TAB CONTENTS */
+.admin-tab { display: none; }
+.admin-tab.active { display: block; }
+
+/* TOAST */
+.toast {
+  position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(80px);
+  background: var(--green-dark); color: #fff;
+  padding: 14px 24px; border-radius: 12px;
+  box-shadow: 0 8px 28px rgba(0,0,0,0.2);
+  font-size: 0.95rem; z-index: 9999;
+  opacity: 0;
+  transition: all 0.3s; pointer-events: none;
+  white-space: nowrap;
+}
+.toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+/* Social auth notice */
+.social-notice {
+  background: #fff8e1; border: 1px solid #f0c94d;
+  border-radius: 10px; padding: 12px 16px;
+  font-size: 0.82rem; color: #6b4c00;
+  margin-bottom: 16px; line-height: 1.5;
+}
+
+@media (max-width: 700px) {
+  .landing-nav { padding: 14px 16px; flex-wrap: wrap; gap: 10px; }
+  .logo { font-size: 1.4rem; }
+  .logo span { font-size: 0.7rem; letter-spacing: 2px; }
+  .nav-links { gap: 8px; }
+  .nav-btn { padding: 8px 16px; font-size: 0.82rem; }
+  .landing-hero { padding: 40px 16px; }
+  .hero-badge { font-size: 0.7rem; letter-spacing: 2px; padding: 5px 14px; }
+  .hero-title { font-size: 2.2rem; }
+  .hero-para { font-size: 0.95rem; margin-bottom: 28px; }
+  .cta-btn { padding: 12px 24px; font-size: 0.92rem; }
+  .hero-cta { flex-direction: column; align-items: center; gap: 10px; }
+  .features-row { flex-direction: column; align-items: flex-start; gap: 14px; padding: 24px 16px; }
+  .modal-box { padding: 28px 20px; margin: 16px; }
+  .modal-box h2 { font-size: 1.4rem; }
+  .shop-header { padding: 0 12px; height: auto; flex-wrap: wrap; gap: 6px; padding-top: 8px; padding-bottom: 8px; }
+  .shop-header .logo { font-size: 1.1rem; }
+  .header-right { flex-wrap: wrap; gap: 6px; }
+  .user-badge { font-size: 0.78rem; padding: 5px 12px; }
+  .cart-btn { font-size: 0.82rem; padding: 7px 14px; }
+  .logout-btn { font-size: 0.78rem; padding: 5px 12px; }
+  .wa-share-btn { font-size: 0.78rem; padding: 6px 12px; }
+  .shop-hero { padding: 32px 16px; }
+  .shop-hero h1 { font-size: 1.6rem; }
+  .shop-hero p { font-size: 0.88rem; }
+  .categories-section { padding: 28px 16px; }
+  .section-title { font-size: 1.3rem; }
+  .cat-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .cat-card { padding: 22px 10px 18px; }
+  .cat-icon { width: 42px; height: 42px; font-size: 1.2rem; }
+  .cat-name { font-size: 0.92rem; }
+  .subcat-panel { margin: 0 16px 20px; padding: 22px 18px; border-radius: 14px; }
+  .subcat-panel h3 { font-size: 1.1rem; }
+  .subcat-btn { padding: 8px 18px; font-size: 0.85rem; }
+  .product-panel { margin: 0 16px 32px; padding: 22px 14px; border-radius: 14px; }
+  .product-panel h3 { font-size: 1.1rem; }
+  table { display: block; overflow-x: auto; white-space: nowrap; }
+  th { padding: 10px 12px; font-size: 0.78rem; }
+  td { padding: 10px 12px; font-size: 0.85rem; }
+  .qty-btn { width: 26px; height: 26px; font-size: 1rem; }
+  .order-btn { width: 100%; text-align: center; padding: 12px; font-size: 0.95rem; }
+  .cart-section { padding: 28px 16px; }
+  .cart-title { font-size: 1.5rem; }
+  .cart-box { padding: 20px 16px; border-radius: 14px; }
+  .cart-box h3 { font-size: 1rem; }
+  .receipt-row { font-size: 0.88rem; flex-wrap: wrap; gap: 4px; }
+  .receipt-row.total { font-size: 1rem; }
+  .user-info-row { flex-direction: column; gap: 8px; }
+  .info-chip { font-size: 0.8rem; }
+  .grand-total-box { flex-direction: column; gap: 6px; text-align: center; padding: 16px; border-radius: 12px; }
+  .grand-total-box span:last-child { font-size: 1.3rem; }
+  .make-order-btn { font-size: 0.95rem; padding: 13px; border-radius: 40px; }
+  .payment-section { padding: 28px 16px; }
+  .payment-title { font-size: 1.5rem; }
+  .pay-option { padding: 14px 16px; }
+  .pay-icon { font-size: 1.4rem; width: 34px; }
+  .pay-name { font-size: 0.9rem; }
+  .pay-detail { font-size: 0.76rem; }
+  .confirm-pay-btn { font-size: 0.95rem; padding: 13px; border-radius: 40px; }
+  .success-box { padding: 40px 24px; margin: 16px; border-radius: 18px; }
+  .success-box h2 { font-size: 1.5rem; }
+  .success-box p { font-size: 0.9rem; }
+  .admin-sidebar { display: none; }
+  .admin-main { margin-left: 0; padding: 16px 12px; }
+  .admin-topbar { flex-direction: column; align-items: flex-start; gap: 10px; margin-bottom: 20px; }
+  .admin-topbar h1 { font-size: 1.3rem; }
+  .admin-mobile-nav { display: flex !important; overflow-x: auto; gap: 8px; margin-bottom: 20px; padding-bottom: 4px; }
+  .admin-mobile-nav-btn {
+    white-space: nowrap; padding: 8px 16px; border-radius: 50px;
+    background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.6);
+    border: 1px solid rgba(255,255,255,0.12); font-size: 0.82rem;
+    cursor: pointer; font-family: 'DM Sans', sans-serif; font-weight: 600;
+  }
+  .admin-mobile-nav-btn.active { background: var(--gold-light); color: var(--green-dark); border-color: var(--gold-light); }
+  .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .stat-card { padding: 16px 14px; border-radius: 12px; }
+  .stat-value { font-size: 1.4rem; }
+  .stat-label { font-size: 0.72rem; }
+  .admin-section-title { font-size: 1rem; }
+  .admin-table th { font-size: 0.72rem; padding: 10px 10px; }
+  .admin-table td { font-size: 0.82rem; padding: 10px 10px; }
+  .admin-table { display: block; overflow-x: auto; white-space: nowrap; }
+  .reply-btn { font-size: 0.75rem; padding: 5px 12px; }
+  footer { padding: 32px 16px 20px; }
+  .footer-grid { grid-template-columns: 1fr; gap: 24px; }
+  .footer-logo { font-size: 1.3rem; }
+  .footer-col h4 { font-size: 0.78rem; }
+  .footer-col p, .footer-col a { font-size: 0.85rem; }
+  .footer-bottom { font-size: 0.76rem; }
+  .back-link { font-size: 0.88rem; }
+  .toast { left: 16px; right: 16px; bottom: 16px; font-size: 0.88rem; text-align: center; transform: translateX(0) translateY(80px); }
+  .toast.show { transform: translateX(0) translateY(0); }
+  .wa-float { bottom: 16px; right: 16px; padding: 11px 18px; font-size: 0.9rem; }
+}
+</style>
+
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+</head>
+<body>
+
+<!-- ========================== PAGE 1: LANDING ========================== -->
+<div id="page-landing" class="page active">
+  <nav class="landing-nav">
+    <div class="logo">EscarPolystore<span>Uganda's Packaging Partner</span></div>
+    <div class="nav-links">
+      <button class="nav-btn outline" onclick="openModal('loginModal')">Login</button>
+      <button class="nav-btn filled" onclick="openModal('registerModal')">Register</button>
+    </div>
+  </nav>
+  <div class="landing-hero">
+    <div class="hero-badge">✦ Premium Polythene Bags — Uganda</div>
+    <h1 class="hero-title">Pack Smarter,<br>Sell <em>Better</em></h1>
+    <p class="hero-para">EscarPolystore is Uganda's trusted source for premium quality polythene bags. From black industrial rolls to branded white bags, we deliver durable, affordable packaging solutions directly to your business — fast, fresh, and reliable.</p>
+    <div class="hero-cta">
+      <button class="cta-btn cta-primary" onclick="openModal('registerModal')">Get Started Today</button>
+      <button class="cta-btn cta-secondary" onclick="openModal('loginModal')">Login to Order</button>
+    </div>
+  </div>
+  <div class="features-row">
+    <div class="feat-item"><span class="feat-icon">📦</span> Bulk Carton Orders</div>
+    <div class="feat-item"><span class="feat-icon">🚚</span> Fast Delivery in Uganda</div>
+    <div class="feat-item"><span class="feat-icon">💚</span> Eco-Friendly Options</div>
+    <div class="feat-item"><span class="feat-icon">📞</span> Dedicated Support</div>
+  </div>
+</div>
+
+<!-- WhatsApp Floating Button (visible on landing) -->
+<button class="wa-float" id="waFloat" onclick="openWhatsApp('Hi EscarPolystore! I want to learn more about your polythene bags.')">
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+  Chat on WhatsApp
+</button>
+
+<!-- LOGIN MODAL -->
+<div class="modal-overlay" id="loginModal">
+  <div class="modal-box">
+    <button class="close-modal" onclick="closeModal('loginModal')">×</button>
+    <h2>Welcome Back</h2>
+    <p>Sign in to your EscarPolystore account</p>
+
+    <!-- Social Login -->
+    <div class="social-btns">
+      <button class="social-btn google-btn" onclick="socialLogin('google')">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+        Continue with Google
+      </button>
+      <button class="social-btn tiktok-btn" onclick="socialLogin('tiktok')">
+        <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.27 6.27 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.18 8.18 0 004.78 1.54V6.79a4.85 4.85 0 01-1.01-.1z"/></svg>
+        Continue with TikTok
+      </button>
+    </div>
+
+    <div class="auth-divider">or sign in with username</div>
+
+    <div class="form-group"><label>Username</label><input type="text" id="loginUser" placeholder="Enter your username"></div>
+    <div class="form-group"><label>Password</label><input type="password" id="loginPass" placeholder="••••••••"></div>
+    <button class="submit-btn" onclick="doLogin()">Sign In</button>
+    <div class="modal-switch">Don't have an account? <a onclick="switchModal('loginModal','registerModal')">Register</a></div>
+  </div>
+</div>
+
+<!-- REGISTER MODAL -->
+<div class="modal-overlay" id="registerModal">
+  <div class="modal-box">
+    <button class="close-modal" onclick="closeModal('registerModal')">×</button>
+    <h2>Create Account</h2>
+    <p>Join EscarPolystore and start ordering today</p>
+
+    <!-- Social Register -->
+    <div class="social-btns">
+      <button class="social-btn google-btn" onclick="socialLogin('google')">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+        Register with Google
+      </button>
+      <button class="social-btn tiktok-btn" onclick="socialLogin('tiktok')">
+        <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.27 6.27 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.18 8.18 0 004.78 1.54V6.79a4.85 4.85 0 01-1.01-.1z"/></svg>
+        Register with TikTok
+      </button>
+    </div>
+
+    <div class="auth-divider">or register with username</div>
+
+    <div class="form-group"><label>Full Name</label><input type="text" id="regName" placeholder="Your full name"></div>
+    <div class="form-group"><label>Username</label><input type="text" id="regUser" placeholder="Choose a username"></div>
+    <div class="form-group"><label>Phone Number (for WhatsApp notifications)</label><input type="text" id="regPhone" placeholder="+256..."></div>
+    <div class="form-group"><label>Location / Address</label><input type="text" id="regLocation" placeholder="e.g. Kampala, Nakawa, Entebbe..."></div>
+    <div class="form-group"><label>Password</label><input type="password" id="regPass" placeholder="Create a password"></div>
+    <button class="submit-btn" onclick="doRegister()">Create Account</button>
+    <div class="modal-switch">Already have an account? <a onclick="switchModal('registerModal','loginModal')">Login</a></div>
+  </div>
+</div>
+
+<!-- SOCIAL LOGIN COMPLETE MODAL (for first-time social users needing phone) -->
+<div class="modal-overlay" id="socialCompleteModal">
+  <div class="modal-box">
+    <button class="close-modal" onclick="closeModal('socialCompleteModal')">×</button>
+    <h2>Complete Your Profile</h2>
+    <p>Just a few more details to finish setting up your account</p>
+    <div class="form-group"><label>Phone Number (for WhatsApp notifications)</label><input type="text" id="socialPhone" placeholder="+256..."></div>
+    <div class="form-group"><label>Location / Address</label><input type="text" id="socialLocation" placeholder="e.g. Kampala, Nakawa..."></div>
+    <button class="submit-btn" onclick="completeSocialProfile()">Save & Continue</button>
+  </div>
+</div>
+
+<!-- ========================== PAGE 2: SHOP ========================== -->
+<div id="page-shop" class="page">
+  <header class="shop-header">
+    <div class="logo" style="font-size:1.4rem;">EscarPolystore</div>
+    <div class="header-right">
+      <div class="user-badge" id="shopUserBadge">👤 User</div>
+      <button class="wa-share-btn" onclick="shareShopOnWhatsApp()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+        Share
+      </button>
+      <button class="cart-btn" onclick="showPage('page-cart')">🛒 Cart (<span id="cartCount">0</span>)</button>
+      <button class="logout-btn" onclick="doLogout()">Logout</button>
+    </div>
+  </header>
+  <div class="shop-hero">
+    <h1>Our Order <em>Categories</em></h1>
+    <p>Select a category below to explore sizes and place your order</p>
+  </div>
+
+  <div class="categories-section">
+    <div class="section-title">Our Order Categories</div>
+    <div class="section-sub">Choose from our premium polythene bag categories</div>
+    <div class="cat-grid">
+      <div class="cat-card" onclick="selectCat('BLACK', this)">
+        <div class="cat-icon" style="background:#111;color:#fff;">⬛</div>
+        <div class="cat-name">BLACK</div>
+      </div>
+      <div class="cat-card" onclick="selectCat('WHITE', this)">
+        <div class="cat-icon" style="background:#eee;color:#333;border:1px solid #ddd;">⬜</div>
+        <div class="cat-name">WHITE</div>
+      </div>
+      <div class="cat-card" onclick="selectCat('GREEN', this)">
+        <div class="cat-icon" style="background:#1a6b3a;color:#fff;">🟩</div>
+        <div class="cat-name">GREEN</div>
+      </div>
+      <div class="cat-card" onclick="selectCat('5X8', this)">
+        <div class="cat-icon" style="background:#c9a227;color:#fff;">📐</div>
+        <div class="cat-name">5 × 8</div>
+      </div>
+      <div class="cat-card" onclick="selectCat('9X15', this)">
+        <div class="cat-icon" style="background:#2d5a9e;color:#fff;">📏</div>
+        <div class="cat-name">9 × 15</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Subcat Panel -->
+  <div class="subcat-panel" id="subcatPanel" style="display:none">
+    <h3 id="subcatTitle">Select a Size</h3>
+    <div class="subcat-grid" id="subcatGrid"></div>
+  </div>
+
+  <!-- Product Panel -->
+  <div class="product-panel" id="productPanel" style="display:none">
+    <h3 id="productTitle">Product Details</h3>
+    <p id="productSub">Adjust quantity and add to your order</p>
+    <div id="productTableWrap"></div>
+    <button class="order-btn" onclick="addToCart()">＋ Add to Order</button>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-grid">
+      <div class="footer-col">
+        <div class="footer-logo">EscarPolystore</div>
+        <p>Uganda's premium polythene bag supplier. Quality products, reliable service, fair prices.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Quick Links</h4>
+        <a href="#">Home</a>
+        <a href="#">Our Products</a>
+        <a href="#">About Us</a>
+        <a href="#">Contact</a>
+      </div>
+      <div class="footer-col">
+        <h4>Contact Us</h4>
+        <p>📧 <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="bedbcddddfccced1d2c7cdcad1ccdbfed9d3dfd7d290ddd1d3">[email&#160;protected]</a></p>
+        <p>📞 +256 750 162 429</p>
+        <p>📞 +256 788 194 736</p>
+        <p>📞 +256 752 485 524</p>
+      </div>
+      <div class="footer-col">
+        <h4>Location</h4>
+        <p>Kampala, Uganda</p>
+        <p>Open Mon–Sat: 8AM – 6PM</p>
+      </div>
+    </div>
+    <div class="footer-bottom">© 2025 EscarPolystore. All rights reserved. | Designed for quality packaging solutions in Uganda.</div>
+  </footer>
+</div>
+
+<!-- ========================== PAGE 3: CART / RECEIPT ========================== -->
+<div id="page-cart" class="page">
+  <div class="shop-header" style="background:var(--green-dark);position:sticky;top:0;z-index:100;">
+    <div class="logo" style="font-family:'Playfair Display',serif;color:var(--gold-light);font-size:1.4rem;">EscarPolystore</div>
+    <div class="header-right">
+      <div class="user-badge" id="cartUserBadge">👤 User</div>
+      <button class="cart-btn" onclick="showPage('page-shop')">🛍️ Continue Shopping</button>
+      <button class="logout-btn" onclick="doLogout()">Logout</button>
+    </div>
+  </div>
+  <div class="cart-section">
+    <div class="back-link" onclick="showPage('page-shop')">← Back to Shop</div>
+    <div class="cart-title">Your Order Receipt</div>
+
+    <div class="cart-box">
+      <div class="user-info-row" id="receiptUserInfo"></div>
+    </div>
+
+    <div class="cart-box">
+      <h3>Order Summary</h3>
+      <div id="receiptItems"></div>
+    </div>
+
+    <div class="grand-total-box">
+      <span>Final Total</span>
+      <span id="receiptGrandTotal">UGX 0</span>
+    </div>
+
+    <button class="make-order-btn" onclick="goToPayment()">💳 Make Payment</button>
+    <button class="wa-cart-share" onclick="shareCartOnWhatsApp()">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+      Share Order on WhatsApp
+    </button>
+  </div>
+</div>
+
+<!-- ========================== PAGE 4: PAYMENT ========================== -->
+<div id="page-payment" class="page">
+  <div class="shop-header" style="background:var(--green-dark);position:sticky;top:0;z-index:100;">
+    <div class="logo" style="font-family:'Playfair Display',serif;color:var(--gold-light);font-size:1.4rem;">EscarPolystore</div>
+    <div class="header-right">
+      <div class="user-badge" id="payUserBadge">👤 User</div>
+      <button class="logout-btn" onclick="doLogout()">Logout</button>
+    </div>
+  </div>
+  <div class="payment-section">
+    <div class="back-link" onclick="showPage('page-cart')">← Back to Receipt</div>
+    <div class="payment-title">Secure Payment</div>
+    <p class="payment-sub">Choose your preferred payment method to complete your order</p>
+
+    <div class="pay-options">
+      <div class="pay-option" id="payMTN" onclick="selectPay('MTN')">
+        <div class="pay-icon">📱</div>
+        <div>
+          <div class="pay-name">MTN Mobile Money</div>
+          <div class="pay-detail">Pay to: +256 788 194 736 (EscarPolystore)</div>
+        </div>
+      </div>
+      <div class="pay-option" id="payAIRTEL" onclick="selectPay('AIRTEL')">
+        <div class="pay-icon">📲</div>
+        <div>
+          <div class="pay-name">Airtel Money</div>
+          <div class="pay-detail">Pay to: +256 752 485 524 (EscarPolystore)</div>
+        </div>
+      </div>
+      <div class="pay-option" id="payVISA" onclick="selectPay('VISA')">
+        <div class="pay-icon">💳</div>
+        <div>
+          <div class="pay-name">VISA / Bank Card</div>
+          <div class="pay-detail">Centenary Bank Account: 3205304204</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="payment-form-area" id="payFormArea" style="display:none">
+      <div id="payFormContent"></div>
+    </div>
+
+    <button class="confirm-pay-btn" onclick="confirmPayment()">Confirm Payment &amp; Complete Order</button>
+  </div>
+</div>
+
+<!-- ========================== PAGE 6: ADMIN DASHBOARD ========================== -->
+<div id="page-admin" class="page">
+  <div class="admin-sidebar">
+    <div class="admin-logo">EscarPolystore<small>Owner Dashboard</small></div>
+    <nav class="admin-nav">
+      <div class="admin-nav-item active" onclick="adminTab('overview', this)"><span>📊</span> Overview</div>
+      <div class="admin-nav-item" onclick="adminTab('orders', this)"><span>📦</span> Orders</div>
+      <div class="admin-nav-item" onclick="adminTab('customers', this)"><span>👥</span> Customers</div>
+      <div class="admin-nav-item" onclick="adminTab('earnings', this)"><span>💰</span> Earnings</div>
+    </nav>
+    <div style="padding:24px;">
+      <button class="admin-logout" onclick="doLogout()">← Exit Dashboard</button>
+    </div>
+  </div>
+
+  <div class="admin-main">
+    <div class="admin-topbar">
+      <h1 id="adminTabTitle">Overview</h1>
+      <div class="admin-topbar-right">
+        <span class="admin-user">👤 Owner: Alexander</span>
+      </div>
+    </div>
+
+    <!-- MOBILE ADMIN NAV -->
+    <div class="admin-mobile-nav" id="adminMobileNav" style="display:none">
+      <button class="admin-mobile-nav-btn active" onclick="adminTabMobile('overview', this)">📊 Overview</button>
+      <button class="admin-mobile-nav-btn" onclick="adminTabMobile('orders', this)">📦 Orders</button>
+      <button class="admin-mobile-nav-btn" onclick="adminTabMobile('customers', this)">👥 Customers</button>
+      <button class="admin-mobile-nav-btn" onclick="adminTabMobile('earnings', this)">💰 Earnings</button>
+      <button class="admin-mobile-nav-btn" onclick="doLogout()" style="background:rgba(255,80,80,0.15);color:#ff6b6b;border-color:rgba(255,80,80,0.2)">← Exit</button>
+    </div>
+
+    <!-- OVERVIEW TAB -->
+    <div class="admin-tab active" id="tab-overview">
+      <div class="stats-grid" id="adminStats"></div>
+      <div class="admin-section">
+        <div class="admin-section-title">Recent Orders</div>
+        <div class="admin-table-wrap" id="recentOrdersTable"></div>
+      </div>
+    </div>
+
+    <!-- ORDERS TAB -->
+    <div class="admin-tab" id="tab-orders">
+      <div class="admin-section">
+        <div class="admin-section-title">All Orders</div>
+        <div class="admin-table-wrap" id="allOrdersTable"></div>
+      </div>
+    </div>
+
+    <!-- CUSTOMERS TAB -->
+    <div class="admin-tab" id="tab-customers">
+      <div class="admin-section">
+        <div class="admin-section-title">Registered Customers</div>
+        <div class="admin-table-wrap" id="customersTable"></div>
+      </div>
+    </div>
+
+    <!-- EARNINGS TAB -->
+    <div class="admin-tab" id="tab-earnings">
+      <div class="admin-section">
+        <div class="admin-section-title">Daily Earnings Summary</div>
+        <div class="admin-table-wrap" id="earningsTable"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- REPLY MODAL -->
+<div class="modal-overlay" id="replyModal">
+  <div class="modal-box reply-modal-box">
+    <button class="close-modal" onclick="closeModal('replyModal')">×</button>
+    <h2>Reply to Customer</h2>
+    <p id="replyOrderInfo">Order details</p>
+    <div class="form-group"><label>Estimated Delivery Date</label><input type="date" id="replyDelivery"></div>
+    <div class="form-group"><label>Message to Customer</label><textarea class="reply-textarea" id="replyMsg" placeholder="Type your reply..."></textarea></div>
+    <button class="submit-btn" onclick="sendReply()">Send Reply</button>
+    <button class="submit-btn" style="background:var(--wa-green);margin-top:10px;" onclick="sendReplyViaWhatsApp()">📲 Send via WhatsApp</button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+// ========================== CONFIG ==========================
+// IMPORTANT: Replace these with your actual Firebase config values
+const firebaseConfig = {
+  apiKey: "AIzaSyCPDXP4aZjLsiVoHhke4-GizE9sUbOI4JY",
+  authDomain: "escarpolystore.firebaseapp.com",
+  projectId: "escarpolystore",
+  storageBucket: "escarpolystore.firebasestorage.app",
+  messagingSenderId: "203568344029",
+  appId: "1:203568344029:web:bd22ea446dbafe82a1e434"
+};
+
+// ADMIN WhatsApp number (receives notifications)
+// Replace with the actual admin WhatsApp number (with country code, no +)
+const ADMIN_WA_NUMBER = '256750162429';
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+const auth = firebase.auth();
+
+// ========================== STATE ==========================
+const state = {
+  currentUser: null,
+  users: [],
+  orders: [],
+  cart: [],
+  selectedCat: null,
+  selectedSub: null,
+  selectedPayMethod: null,
+  currentReplyOrderId: null,
+  lastOrderId: null,
+  pendingSocialUser: null
+};
+
+// Product data
+const products = {
+  BLACK: {
+    subcats: ['Size: 12', 'Size: 15', 'Size: 22'],
+    prices: { 'Size: 12': 45000, 'Size: 15': 45000, 'Size: 22': 54000 }
+  },
+  WHITE: {
+    subcats: ['Kats', 'Fountain', 'Nyanja', 'Airforce'],
+    prices: { 'Kats': 70000, 'Fountain': 70000, 'Nyanja': 70000, 'Airforce': 70000 }
+  },
+  GREEN: {
+    subcats: ['Size: 12', 'Size: 15', 'Size: 22'],
+    prices: { 'Size: 12': 45000, 'Size: 15': 45000, 'Size: 22': 54000 }
+  },
+  '5X8': {
+    subcats: ['Small', 'Medium', 'Large'],
+    prices: { 'Small': 38000, 'Medium': 42000, 'Large': 48000 }
+  },
+  '9X15': {
+    subcats: ['Standard', 'Heavy Duty'],
+    prices: { 'Standard': 52000, 'Heavy Duty': 60000 }
+  }
+};
+
+// ========================== WHATSAPP INTEGRATION ==========================
+function openWhatsApp(message) {
+  const encoded = encodeURIComponent(message);
+  window.open(`https://wa.me/${ADMIN_WA_NUMBER}?text=${encoded}`, '_blank');
+}
+
+function shareShopOnWhatsApp() {
+  const msg = `🛍️ *EscarPolystore* — Uganda's Premium Polythene Bags!\n\nI just discovered this amazing shop for quality polythene bags.\n📦 Bulk orders available\n🚚 Fast delivery in Uganda\n💚 Great prices!\n\nCheck them out: https://escarpolystore.com`;
+  openWhatsApp(msg);
+}
+
+function shareCartOnWhatsApp() {
+  if (state.cart.length === 0) { toast('Your cart is empty!'); return; }
+  const user = state.currentUser;
+  let itemsText = state.cart.map(i => `  • ${i.category} ${i.sub} × ${i.qty} cartons = UGX ${i.total.toLocaleString()}`).join('\n');
+  const grand = state.cart.reduce((s, i) => s + i.total, 0);
+  const msg = `🛒 *My EscarPolystore Order*\n\n👤 Customer: ${user?.name || 'Guest'}\n📞 Phone: ${user?.phone || '—'}\n📍 Location: ${user?.location || '—'}\n\n📦 *Items:*\n${itemsText}\n\n💰 *Total: UGX ${grand.toLocaleString()}*\n\nPlease confirm this order. Thank you!`;
+  openWhatsApp(msg);
+}
+
+function shareOrderConfirmOnWhatsApp() {
+  const msg = `🎉 I just placed an order at *EscarPolystore* — Uganda's best polythene bag shop!\n\nOrder ID: ${state.lastOrderId || 'N/A'}\n\n📦 Quality polythene bags at great prices.\n🚚 Fast delivery in Kampala & Uganda.\n\nShop too: https://escarpolystore.com`;
+  openWhatsApp(msg);
+}
+
+// Admin WhatsApp notification
+function notifyAdminViaWhatsApp(type, data) {
+  let msg = '';
+  if (type === 'new_order') {
+    const items = data.items.map(i => `  • ${i.category} ${i.sub} × ${i.qty}`).join('\n');
+    msg = `🆕 *NEW ORDER RECEIVED!*\n\n🧾 Order ID: ${data.id}\n👤 Customer: ${data.customer}\n📞 Phone: ${data.phone}\n📍 Location: ${data.location}\n\n📦 *Items:*\n${items}\n\n💰 Total: UGX ${data.total.toLocaleString()}\n💳 Payment: ${data.payMethod}\n⏰ Time: ${data.time} on ${data.date}`;
+  } else if (type === 'new_registration') {
+    msg = `👤 *NEW CUSTOMER REGISTERED!*\n\n✅ Name: ${data.name}\n📱 Username: @${data.username}\n📞 Phone: ${data.phone || '—'}\n📍 Location: ${data.location || '—'}\n📅 Joined: ${data.joinDate}`;
+  }
+  if (msg) {
+    const encoded = encodeURIComponent(msg);
+    window.open(`https://wa.me/${ADMIN_WA_NUMBER}?text=${encoded}`, '_blank');
+  }
+}
+
+function notifyCustomerViaWhatsApp(order, replyMsg, deliveryDate) {
+  const customerPhone = order.phone ? order.phone.replace(/[\s\+\-]/g, '') : null;
+  if (!customerPhone || customerPhone === '' || customerPhone === '—') {
+    toast('No phone number for this customer');
+    return;
+  }
+  const msg = `📦 *EscarPolystore — Order Update*\n\n🧾 Order: ${order.id}\n\n${replyMsg}${deliveryDate ? `\n\n🚚 Estimated Delivery: ${deliveryDate}` : ''}\n\nThank you for shopping with EscarPolystore! 💚`;
+  const encoded = encodeURIComponent(msg);
+  window.open(`https://wa.me/${customerPhone}?text=${encoded}`, '_blank');
+}
+
+// ========================== AUTH ==========================
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+function switchModal(a, b) { closeModal(a); openModal(b); }
+
+// Social Login (Google / TikTok simulation)
+// NOTE: Google auth requires Firebase project configuration with Google provider enabled.
+// TikTok OAuth requires a TikTok developer app — shown as demo with custom flow.
+async function socialLogin(provider) {
+  if (provider === 'google') {
+    try {
+      const googleProvider = new firebase.auth.GoogleAuthProvider();
+      googleProvider.addScope('profile');
+      googleProvider.addScope('email');
+      toast('Opening Google sign-in...');
+      const result = await auth.signInWithPopup(googleProvider);
+      const firebaseUser = result.user;
+      // Check if user already exists in Firestore
+      const username = firebaseUser.email.split('@')[0].replace(/[^a-zA-Z0-9_]/g, '');
+      const existingDoc = await db.collection('users').doc(username).get();
+      if (existingDoc.exists) {
+        // Existing user — log them in
+        state.currentUser = existingDoc.data();
+        closeModal('loginModal');
+        closeModal('registerModal');
+        afterLogin();
+        return;
+      }
+      // New social user — need extra info
+      state.pendingSocialUser = {
+        name: firebaseUser.displayName || firebaseUser.email,
+        username: username,
+        email: firebaseUser.email,
+        socialProvider: 'Google'
+      };
+      closeModal('loginModal');
+      closeModal('registerModal');
+      openModal('socialCompleteModal');
+    } catch(e) {
+      console.error(e);
+      if (e.code === 'auth/popup-closed-by-user') {
+        toast('Sign-in cancelled');
+      } else if (e.code === 'auth/configuration-not-found' || e.code === 'auth/operation-not-allowed') {
+        toast('Google login: Enable in Firebase Console → Authentication → Google provider');
+      } else {
+        toast('Google sign-in failed. Please use username login below.');
+      }
+    }
+  } else if (provider === 'tiktok') {
+    // TikTok OAuth requires backend — demo simulation
+    toast('TikTok login: Contact admin to enable TikTok OAuth integration');
+    setTimeout(() => toast('Tip: Use username/password login in the meantime'), 3200);
+  }
+}
+
+async function completeSocialProfile() {
+  if (!state.pendingSocialUser) return;
+  const phone = document.getElementById('socialPhone').value.trim();
+  const location = document.getElementById('socialLocation').value.trim();
+  if (!phone) { toast('Please enter your phone number'); return; }
+  const userData = {
+    name: state.pendingSocialUser.name,
+    username: state.pendingSocialUser.username,
+    phone,
+    location,
+    email: state.pendingSocialUser.email || '',
+    socialProvider: state.pendingSocialUser.socialProvider,
+    password: '', // social users have no password
+    joinDate: new Date().toLocaleDateString()
+  };
+  try {
+    await db.collection('users').doc(userData.username).set(userData);
+    state.currentUser = userData;
+    state.pendingSocialUser = null;
+    closeModal('socialCompleteModal');
+    toast('Welcome, ' + userData.name + '! Account created! 🎉');
+    // Notify admin of new registration
+    setTimeout(() => notifyAdminViaWhatsApp('new_registration', userData), 1000);
+    afterLogin();
+  } catch(e) {
+    toast('Error saving profile. Check internet.');
+    console.error(e);
+  }
+}
+
+async function doRegister() {
+  const name = document.getElementById('regName').value.trim();
+  const user = document.getElementById('regUser').value.trim();
+  const phone = document.getElementById('regPhone').value.trim();
+  const location = document.getElementById('regLocation').value.trim();
+  const pass = document.getElementById('regPass').value.trim();
+  if (!name || !user || !pass) return toast('Please fill all required fields');
+  if (!phone) return toast('Phone number is needed for WhatsApp notifications');
+  toast('Creating account...');
+  try {
+    const existing = await db.collection('users').where('username', '==', user).get();
+    if (!existing.empty) return toast('Username already exists. Choose another.');
+    const userData = { name, username: user, phone, location, password: pass, joinDate: new Date().toLocaleDateString() };
+    await db.collection('users').doc(user).set(userData);
+    closeModal('registerModal');
+    toast('Account created! 🎉 Notifying admin...');
+    // Notify admin of new registration
+    setTimeout(() => notifyAdminViaWhatsApp('new_registration', userData), 800);
+    openModal('loginModal');
+  } catch(e) {
+    toast('Error creating account. Check internet connection.');
+    console.error(e);
+  }
+}
+
+async function doLogin() {
+  const user = document.getElementById('loginUser').value.trim();
+  const pass = document.getElementById('loginPass').value.trim();
+  if (user === 'margaret' && pass === 'margie1980') {
+    closeModal('loginModal');
+    toast('Loading dashboard...');
+    await loadAllData();
+    showPage('page-admin');
+    renderAdmin();
+    return;
+  }
+  toast('Signing in...');
+  try {
+    const doc = await db.collection('users').doc(user).get();
+    if (!doc.exists || doc.data().password !== pass) return toast('Invalid username or password');
+    state.currentUser = doc.data();
+    closeModal('loginModal');
+    afterLogin();
+  } catch(e) {
+    toast('Login failed. Check internet connection.');
+    console.error(e);
+  }
+}
+
+function afterLogin() {
+  document.getElementById('shopUserBadge').textContent = '👤 ' + state.currentUser.name;
+  document.getElementById('cartUserBadge').textContent = '👤 ' + state.currentUser.name;
+  document.getElementById('payUserBadge').textContent = '👤 ' + state.currentUser.name;
+  showPage('page-shop');
+  toast('Welcome, ' + state.currentUser.name + '! 🛍️');
+}
+
+function doLogout() {
+  state.currentUser = null;
+  state.cart = [];
+  updateCartCount();
+  auth.signOut().catch(() => {});
+  showPage('page-landing');
+}
+
+// ========================== NAVIGATION ==========================
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0, 0);
+  if (id === 'page-cart') renderReceipt();
+  if (id === 'page-admin') setTimeout(checkMobileNav, 50);
+  // Hide WA float on non-landing pages
+  const waFloat = document.getElementById('waFloat');
+  if (waFloat) waFloat.style.display = (id === 'page-landing') ? 'flex' : 'none';
+}
+
+// ========================== SHOP ==========================
+let currentQty = {};
+
+function selectCat(cat, el) {
+  state.selectedCat = cat;
+  state.selectedSub = null;
+  document.querySelectorAll('.cat-card').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  const data = products[cat];
+  document.getElementById('subcatPanel').style.display = 'block';
+  document.getElementById('subcatTitle').textContent = cat + ' — Select a variant';
+  const grid = document.getElementById('subcatGrid');
+  grid.innerHTML = data.subcats.map(s => `<button class="subcat-btn" onclick="selectSub('${s}', this)">${s}</button>`).join('');
+  document.getElementById('productPanel').style.display = 'none';
+  document.getElementById('subcatPanel').scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+function selectSub(sub, el) {
+  state.selectedSub = sub;
+  document.querySelectorAll('.subcat-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  const price = products[state.selectedCat].prices[sub];
+  currentQty = { qty: 1 };
+  document.getElementById('productPanel').style.display = 'block';
+  document.getElementById('productTitle').textContent = state.selectedCat + ' — ' + sub;
+  document.getElementById('productSub').textContent = 'Adjust number of cartons and add to your order';
+  renderProductTable(sub, price);
+  document.getElementById('productPanel').scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+function renderProductTable(sub, price) {
+  currentQty.qty = 1;
+  const wrap = document.getElementById('productTableWrap');
+  wrap.innerHTML = `
+    <table>
+      <thead><tr><th>Item</th><th>Unit Price (UGX)</th><th>No. of Cartons</th><th>Total Price (UGX)</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>${state.selectedCat} — ${sub}</td>
+          <td>${price.toLocaleString()}</td>
+          <td>
+            <div class="qty-control">
+              <button class="qty-btn" onclick="changeQty(-1, ${price})">−</button>
+              <span class="qty-val" id="qtyVal">1</span>
+              <button class="qty-btn" onclick="changeQty(1, ${price})">+</button>
+            </div>
+          </td>
+          <td class="total-cell" id="totalCell">${price.toLocaleString()}</td>
+        </tr>
+      </tbody>
+    </table>
+  `;
+}
+
+function changeQty(delta, price) {
+  currentQty.qty = Math.max(1, currentQty.qty + delta);
+  document.getElementById('qtyVal').textContent = currentQty.qty;
+  document.getElementById('totalCell').textContent = (currentQty.qty * price).toLocaleString();
+}
+
+function addToCart() {
+  if (!state.selectedCat || !state.selectedSub) return;
+  const price = products[state.selectedCat].prices[state.selectedSub];
+  const item = {
+    id: Date.now(),
+    category: state.selectedCat,
+    sub: state.selectedSub,
+    qty: currentQty.qty,
+    unitPrice: price,
+    total: currentQty.qty * price
+  };
+  const existing = state.cart.find(c => c.category === item.category && c.sub === item.sub);
+  if (existing) {
+    existing.qty += item.qty;
+    existing.total = existing.qty * existing.unitPrice;
+  } else {
+    state.cart.push(item);
+  }
+  updateCartCount();
+  toast(`Added ${item.qty} carton(s) of ${item.category} ${item.sub} to cart!`);
+}
+
+function updateCartCount() {
+  document.getElementById('cartCount').textContent = state.cart.length;
+}
+
+// ========================== CART / RECEIPT ==========================
+function goToPayment() {
+  if (state.cart.length === 0) return toast('Your cart is empty!');
+  showPage('page-payment');
+}
+
+function renderReceipt() {
+  const now = new Date();
+  const userInfo = document.getElementById('receiptUserInfo');
+  userInfo.innerHTML = `
+    <div class="info-chip"><strong>👤 Name:</strong> ${state.currentUser?.name || 'Guest'}</div>
+    <div class="info-chip"><strong>📅 Date:</strong> ${now.toLocaleDateString()}</div>
+    <div class="info-chip"><strong>⏰ Time:</strong> ${now.toLocaleTimeString()}</div>
+    <div class="info-chip"><strong>📞 Phone:</strong> ${state.currentUser?.phone || '—'}</div>
+    <div class="info-chip"><strong>📍 Location:</strong> ${state.currentUser?.location || '—'}</div>
+  `;
+  const itemsDiv = document.getElementById('receiptItems');
+  let grand = 0;
+  itemsDiv.innerHTML = state.cart.map(item => {
+    grand += item.total;
+    return `<div class="receipt-row"><span>${item.category} — ${item.sub} × ${item.qty} cartons</span><span>UGX ${item.total.toLocaleString()}</span></div>`;
+  }).join('') + `<div class="receipt-row total"><span>Grand Total</span><span>UGX ${grand.toLocaleString()}</span></div>`;
+  document.getElementById('receiptGrandTotal').textContent = 'UGX ' + grand.toLocaleString();
+}
+
+// ========================== PAYMENT ==========================
+function selectPay(method) {
+  state.selectedPayMethod = method;
+  document.querySelectorAll('.pay-option').forEach(o => o.classList.remove('selected'));
+  document.getElementById('pay' + method).classList.add('selected');
+  const area = document.getElementById('payFormArea');
+  const cnt = document.getElementById('payFormContent');
+  area.style.display = 'block';
+
+  if (method === 'MTN') {
+    cnt.innerHTML = `
+      <div style="background:#fff8e1;border:1.5px solid #f0c94d;border-radius:14px;padding:18px 20px;margin-bottom:18px;">
+        <div style="font-weight:700;color:#7a5c00;font-size:0.95rem;margin-bottom:10px;">📋 How to pay with MTN Mobile Money</div>
+        <ol style="color:#5a4200;font-size:0.88rem;line-height:2;padding-left:18px;">
+          <li>Dial <strong style="color:#1a6b3a;">*165#</strong> and press Call</li>
+          <li>Select <strong>"Send Money"</strong></li>
+          <li>Enter number: <strong style="color:#1a6b3a;">+256 788 194 736</strong></li>
+          <li>Enter the exact total amount shown above</li>
+          <li>Enter your MTN PIN on your phone (not here)</li>
+          <li>Copy the <strong>Transaction ID</strong> from the SMS and paste below</li>
+        </ol>
+        <div style="margin-top:12px;padding:10px 14px;background:#fff3cd;border-radius:8px;font-size:0.82rem;color:#856404;">
+          ⚠️ <strong>Never enter your PIN on any website.</strong>
+        </div>
+      </div>
+      <label style="font-size:0.85rem;font-weight:600;color:#222;display:block;margin-bottom:6px;">Your MTN Phone Number</label>
+      <input class="pay-input" placeholder="e.g. 0788 123 456" type="tel">
+      <label style="font-size:0.85rem;font-weight:600;color:#222;display:block;margin-bottom:6px;">Transaction ID from MTN SMS</label>
+      <input class="pay-input" placeholder="e.g. 1234567890">
+    `;
+  } else if (method === 'AIRTEL') {
+    cnt.innerHTML = `
+      <div style="background:#fff0f0;border:1.5px solid #ff6b6b;border-radius:14px;padding:18px 20px;margin-bottom:18px;">
+        <div style="font-weight:700;color:#8b0000;font-size:0.95rem;margin-bottom:10px;">📋 How to pay with Airtel Money</div>
+        <ol style="color:#6b0000;font-size:0.88rem;line-height:2;padding-left:18px;">
+          <li>Dial <strong style="color:#1a6b3a;">*185#</strong> and press Call</li>
+          <li>Select <strong>"Send Money"</strong></li>
+          <li>Enter number: <strong style="color:#1a6b3a;">+256 752 485 524</strong></li>
+          <li>Enter the exact total amount</li>
+          <li>Enter your Airtel PIN on your phone (not here)</li>
+          <li>Copy the <strong>Transaction ID</strong> and paste below</li>
+        </ol>
+        <div style="margin-top:12px;padding:10px 14px;background:#ffe0e0;border-radius:8px;font-size:0.82rem;color:#8b0000;">
+          ⚠️ <strong>Never enter your PIN on any website.</strong>
+        </div>
+      </div>
+      <label style="font-size:0.85rem;font-weight:600;color:#222;display:block;margin-bottom:6px;">Your Airtel Phone Number</label>
+      <input class="pay-input" placeholder="e.g. 0752 123 456" type="tel">
+      <label style="font-size:0.85rem;font-weight:600;color:#222;display:block;margin-bottom:6px;">Transaction ID from Airtel SMS</label>
+      <input class="pay-input" placeholder="e.g. AIR1234567890">
+    `;
+  } else {
+    cnt.innerHTML = `
+      <div style="background:#e8f5e9;border:1.5px solid #2d9e58;border-radius:14px;padding:18px 20px;margin-bottom:18px;">
+        <div style="font-weight:700;color:#0e4523;font-size:0.95rem;margin-bottom:10px;">📋 VISA / ATM Card Payment</div>
+        <p style="color:#1a4523;font-size:0.88rem;">Centenary Bank Account: <strong>3205304204</strong></p>
+        <div style="margin-top:12px;padding:10px 14px;background:#c8e6c9;border-radius:8px;font-size:0.82rem;color:#1b5e20;">
+          🔒 Enter your card details securely below
+        </div>
+      </div>
+      <label style="font-size:0.85rem;font-weight:600;color:#222;display:block;margin-bottom:6px;">Cardholder Name</label>
+      <input class="pay-input" placeholder="Name on card">
+      <label style="font-size:0.85rem;font-weight:600;color:#222;display:block;margin-bottom:6px;">Card Number</label>
+      <input class="pay-input" placeholder="1234  5678  9012  3456" maxlength="19">
+      <div style="display:flex;gap:12px;">
+        <div style="flex:1;">
+          <label style="font-size:0.85rem;font-weight:600;color:#222;display:block;margin-bottom:6px;">Expiry</label>
+          <input class="pay-input" placeholder="MM / YY">
+        </div>
+        <div style="flex:1;">
+          <label style="font-size:0.85rem;font-weight:600;color:#222;display:block;margin-bottom:6px;">CVV</label>
+          <input class="pay-input" placeholder="3 digits" maxlength="3">
+        </div>
+      </div>
+    `;
+  }
+}
+
+async function confirmPayment() {
+  if (!state.selectedPayMethod) return toast('Please select a payment method');
+  const grand = state.cart.reduce((s, i) => s + i.total, 0);
+  const orderId = 'ORD-' + Date.now();
+  const order = {
+    id: orderId,
+    customer: state.currentUser?.name || 'Guest',
+    username: state.currentUser?.username || 'guest',
+    phone: state.currentUser?.phone || '—',
+    location: state.currentUser?.location || '—',
+    items: [...state.cart],
+    total: grand,
+    payMethod: state.selectedPayMethod,
+    date: new Date().toLocaleDateString(),
+    time: new Date().toLocaleTimeString(),
+    status: 'Pending',
+    reply: null
+  };
+  toast('Processing your order...');
+  try {
+    await db.collection('orders').doc(orderId).set(order);
+    state.lastOrderId = orderId;
+    state.cart = [];
+    updateCartCount();
+    state.selectedPayMethod = null;
+    document.querySelectorAll('.pay-option').forEach(o => o.classList.remove('selected'));
+    document.getElementById('payFormArea').style.display = 'none';
+    showPage('page-shop');
+    toast('✅ Order placed! We will contact you shortly.');
+    // Notify admin via WhatsApp
+    setTimeout(() => notifyAdminViaWhatsApp('new_order', order), 1500);
+  } catch(e) {
+    toast('Error saving order. Check internet and try again.');
+    console.error(e);
+  }
+}
+
+// ========================== ADMIN ==========================
+async function loadAllData() {
+  try {
+    const ordersSnap = await db.collection('orders').orderBy('date', 'desc').get();
+    state.orders = ordersSnap.docs.map(d => d.data());
+    const usersSnap = await db.collection('users').get();
+    state.users = usersSnap.docs.map(d => d.data());
+  } catch(e) {
+    console.error('Error loading data:', e);
+  }
+}
+
+async function renderAdmin() {
+  document.getElementById('adminStats').innerHTML = '<p style="color:rgba(255,255,255,0.4);padding:16px">Loading data...</p>';
+  await loadAllData();
+  renderStats();
+  renderOrdersTable('recentOrdersTable', state.orders.slice(0, 5));
+  renderOrdersTable('allOrdersTable', state.orders);
+  renderCustomersTable();
+  renderEarningsTable();
+}
+
+function renderStats() {
+  const totalOrders = state.orders.length;
+  const totalEarnings = state.orders.reduce((s, o) => s + o.total, 0);
+  const totalCustomers = state.users.length;
+  const today = new Date().toLocaleDateString();
+  const todayEarnings = state.orders.filter(o => o.date === today).reduce((s, o) => s + o.total, 0);
+  document.getElementById('adminStats').innerHTML = `
+    <div class="stat-card"><div class="stat-label">Total Orders</div><div class="stat-value">${totalOrders}</div><div class="stat-sub">All time</div></div>
+    <div class="stat-card"><div class="stat-label">Total Earnings</div><div class="stat-value">UGX ${(totalEarnings/1000).toFixed(0)}K</div><div class="stat-sub">All time revenue</div></div>
+    <div class="stat-card"><div class="stat-label">Customers</div><div class="stat-value">${totalCustomers}</div><div class="stat-sub">Registered users</div></div>
+    <div class="stat-card"><div class="stat-label">Today's Earnings</div><div class="stat-value">UGX ${(todayEarnings/1000).toFixed(0)}K</div><div class="stat-sub">${today}</div></div>
+  `;
+}
+
+function renderOrdersTable(targetId, orders) {
+  const el = document.getElementById(targetId);
+  if (!orders.length) { el.innerHTML = '<p style="color:rgba(255,255,255,0.4);padding:16px">No orders yet.</p>'; return; }
+  const statusColors = { Pending: 'status-pending', Confirmed: 'status-confirmed', Delivered: 'status-delivered' };
+  el.innerHTML = `<table class="admin-table">
+    <thead><tr><th>Order ID</th><th>Customer</th><th>Phone</th><th>Location</th><th>Items</th><th>Total</th><th>Date</th><th>Time</th><th>Payment</th><th>Status</th><th>Action</th></tr></thead>
+    <tbody>${orders.map(o => `<tr>
+      <td style="color:var(--gold-light);font-weight:700">${o.id}</td>
+      <td>${o.customer}</td>
+      <td>${o.phone}</td>
+      <td>${o.location || '—'}</td>
+      <td>${o.items.map(i => i.category + ' ' + i.sub + ' ×' + i.qty).join(', ')}</td>
+      <td style="color:#2d9e58;font-weight:700">UGX ${o.total.toLocaleString()}</td>
+      <td>${o.date}</td>
+      <td>${o.time}</td>
+      <td>${o.payMethod}</td>
+      <td><select class="status-badge ${statusColors[o.status] || 'status-pending'}" onchange="updateStatus('${o.id}', this)" style="background:transparent;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.5px">
+        <option ${o.status==='Pending'?'selected':''}>Pending</option>
+        <option ${o.status==='Confirmed'?'selected':''}>Confirmed</option>
+        <option ${o.status==='Delivered'?'selected':''}>Delivered</option>
+      </select></td>
+      <td>
+        <button class="reply-btn" onclick="openReply('${o.id}')">💬 Reply</button>
+        <button class="wa-notify-btn" onclick="quickWaNotify('${o.id}')">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+          WA
+        </button>
+        <button class="delete-btn" onclick="deleteOrder('${o.id}')">🗑 Delete</button>
+        ${o.reply ? '<span style="color:#2d9e58;font-size:0.75rem;margin-left:6px">✓ Replied</span>' : ''}
+      </td>
+    </tr>`).join('')}</tbody>
+  </table>`;
+}
+
+function quickWaNotify(orderId) {
+  const order = state.orders.find(o => o.id === orderId);
+  if (!order) return;
+  const msg = `📦 *EscarPolystore — Order Update*\n\nDear ${order.customer},\n\nYour order ${order.id} has been received and is being processed.\n\n💰 Total: UGX ${order.total.toLocaleString()}\n📅 Date: ${order.date}\n\nWe will contact you shortly with delivery details.\n\nThank you! 💚`;
+  const phone = order.phone ? order.phone.replace(/[\s\+\-]/g, '') : null;
+  if (!phone || phone === '—') { toast('No phone number for this customer'); return; }
+  const encoded = encodeURIComponent(msg);
+  window.open(`https://wa.me/${phone}?text=${encoded}`, '_blank');
+}
+
+function renderCustomersTable() {
+  const el = document.getElementById('customersTable');
+  if (!state.users.length) { el.innerHTML = '<p style="color:rgba(255,255,255,0.4);padding:16px">No customers yet.</p>'; return; }
+  el.innerHTML = `<table class="admin-table">
+    <thead><tr><th>Full Name</th><th>Username</th><th>Phone</th><th>Joined</th><th>Orders</th><th>Total Spent</th><th>WhatsApp</th><th>Action</th></tr></thead>
+    <tbody>${state.users.map(u => {
+      const userOrders = state.orders.filter(o => o.username === u.username);
+      const spent = userOrders.reduce((s, o) => s + o.total, 0);
+      const phone = u.phone ? u.phone.replace(/[\s\+\-]/g, '') : '';
+      return `<tr>
+        <td>${u.name}</td>
+        <td style="color:var(--gold-light)">@${u.username}</td>
+        <td>${u.phone || '—'}</td>
+        <td>${u.joinDate || '—'}</td>
+        <td>${userOrders.length}</td>
+        <td style="color:#2d9e58">UGX ${spent.toLocaleString()}</td>
+        <td>${phone ? `<button class="wa-notify-btn" onclick="window.open('https://wa.me/${phone}','_blank')"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg> Chat</button>` : '—'}</td>
+        <td><button class="delete-btn" onclick="deleteCustomer('${u.username}')">🗑 Delete</button></td>
+      </tr>`;
+    }).join('')}</tbody>
+  </table>`;
+}
+
+async function deleteOrder(orderId) {
+  if (!confirm(`Delete order ${orderId}? This cannot be undone.`)) return;
+  try {
+    await db.collection('orders').doc(orderId).delete();
+    state.orders = state.orders.filter(o => o.id !== orderId);
+    toast('Order deleted.');
+    renderOrdersTable('recentOrdersTable', state.orders.slice(0, 5));
+    renderOrdersTable('allOrdersTable', state.orders);
+    renderStats();
+    renderEarningsTable();
+  } catch(e) {
+    toast('Error deleting order. Check connection.');
+    console.error(e);
+  }
+}
+
+async function deleteCustomer(username) {
+  if (!confirm(`Delete customer @${username}? This cannot be undone.`)) return;
+  try {
+    await db.collection('users').doc(username).delete();
+    state.users = state.users.filter(u => u.username !== username);
+    toast('Customer deleted.');
+    renderCustomersTable();
+    renderStats();
+  } catch(e) {
+    toast('Error deleting customer. Check connection.');
+    console.error(e);
+  }
+}
+
+function renderEarningsTable() {
+  const el = document.getElementById('earningsTable');
+  const byDate = {};
+  state.orders.forEach(o => {
+    if (!byDate[o.date]) byDate[o.date] = { count: 0, total: 0 };
+    byDate[o.date].count++;
+    byDate[o.date].total += o.total;
+  });
+  const dates = Object.keys(byDate).sort().reverse();
+  if (!dates.length) { el.innerHTML = '<p style="color:rgba(255,255,255,0.4);padding:16px">No earnings data yet.</p>'; return; }
+  el.innerHTML = `<table class="admin-table">
+    <thead><tr><th>Date</th><th>Orders</th><th>Total Earnings (UGX)</th></tr></thead>
+    <tbody>${dates.map(d => `<tr><td>${d}</td><td>${byDate[d].count}</td><td style="color:#2d9e58;font-weight:700">UGX ${byDate[d].total.toLocaleString()}</td></tr>`).join('')}</tbody>
+  </table>`;
+}
+
+async function updateStatus(orderId, select) {
+  const newStatus = select.value;
+  try {
+    await db.collection('orders').doc(orderId).update({ status: newStatus });
+    const order = state.orders.find(o => o.id === orderId);
+    if (order) order.status = newStatus;
+    toast('Status updated to ' + newStatus);
+    select.className = `status-badge ${newStatus === 'Pending' ? 'status-pending' : newStatus === 'Confirmed' ? 'status-confirmed' : 'status-delivered'}`;
+  } catch(e) {
+    toast('Error updating status. Check connection.');
+    console.error(e);
+  }
+}
+
+function openReply(orderId) {
+  state.currentReplyOrderId = orderId;
+  const order = state.orders.find(o => o.id === orderId);
+  document.getElementById('replyOrderInfo').textContent = `Replying to: ${order.customer} — Order ${order.id}`;
+  document.getElementById('replyDelivery').value = '';
+  document.getElementById('replyMsg').value = order.reply || '';
+  openModal('replyModal');
+}
+
+async function sendReply() {
+  const order = state.orders.find(o => o.id === state.currentReplyOrderId);
+  if (order) {
+    const delivery = document.getElementById('replyDelivery').value;
+    const msg = document.getElementById('replyMsg').value.trim();
+    if (!msg) return toast('Please write a message');
+    const newStatus = order.status === 'Pending' ? 'Confirmed' : order.status;
+    try {
+      await db.collection('orders').doc(order.id).update({
+        reply: msg,
+        deliveryDate: delivery,
+        status: newStatus
+      });
+      order.reply = msg;
+      order.deliveryDate = delivery;
+      order.status = newStatus;
+      closeModal('replyModal');
+      toast('Reply saved for ' + order.customer);
+      renderAdmin();
+    } catch(e) {
+      toast('Error sending reply. Check connection.');
+      console.error(e);
+    }
+  }
+}
+
+async function sendReplyViaWhatsApp() {
+  const order = state.orders.find(o => o.id === state.currentReplyOrderId);
+  if (!order) return;
+  const delivery = document.getElementById('replyDelivery').value;
+  const msg = document.getElementById('replyMsg').value.trim();
+  if (!msg) return toast('Please write a message first');
+  // Save reply first
+  const newStatus = order.status === 'Pending' ? 'Confirmed' : order.status;
+  try {
+    await db.collection('orders').doc(order.id).update({ reply: msg, deliveryDate: delivery, status: newStatus });
+    order.reply = msg; order.deliveryDate = delivery; order.status = newStatus;
+  } catch(e) { console.error(e); }
+  closeModal('replyModal');
+  toast('Opening WhatsApp...');
+  // Notify customer via WhatsApp
+  notifyCustomerViaWhatsApp(order, msg, delivery);
+  renderAdmin();
+}
+
+function adminTab(tab, el) {
+  document.querySelectorAll('.admin-nav-item').forEach(i => i.classList.remove('active'));
+  el.classList.add('active');
+  document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  const titles = { overview: 'Overview', orders: 'All Orders', customers: 'Customers', earnings: 'Earnings' };
+  document.getElementById('adminTabTitle').textContent = titles[tab];
+}
+
+function adminTabMobile(tab, el) {
+  document.querySelectorAll('.admin-mobile-nav-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  const titles = { overview: 'Overview', orders: 'All Orders', customers: 'Customers', earnings: 'Earnings' };
+  document.getElementById('adminTabTitle').textContent = titles[tab];
+}
+
+// ========================== TOAST ==========================
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3200);
+}
+
+function checkMobileNav() {
+  const nav = document.getElementById('adminMobileNav');
+  if (nav) nav.style.display = window.innerWidth <= 700 ? 'flex' : 'none';
+}
+window.addEventListener('resize', checkMobileNav);
+
+// Close modals on backdrop click
+document.querySelectorAll('.modal-overlay').forEach(m => {
+  m.addEventListener('click', e => { if (e.target === m) m.classList.remove('open'); });
+});
+</script>
+</body>
+</html>
