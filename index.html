@@ -195,7 +195,6 @@ body { font-family: 'DM Sans', sans-serif; background: var(--white); color: var(
 }
 .social-btn:hover { border-color: var(--green); background: #f8fff9; }
 .social-btn.google-btn:hover { border-color: #4285F4; }
-.social-btn.tiktok-btn:hover { border-color: #000; }
 .social-btn svg { width: 20px; height: 20px; flex-shrink: 0; }
 
 /* ===== PAGE 2: SHOP ===== */
@@ -762,6 +761,8 @@ footer {
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<!-- EmailJS SDK -->
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 </head>
 <body>
 
@@ -810,10 +811,6 @@ footer {
         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
         Continue with Google
       </button>
-      <button class="social-btn tiktok-btn" onclick="socialLogin('tiktok')">
-        <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.27 6.27 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.18 8.18 0 004.78 1.54V6.79a4.85 4.85 0 01-1.01-.1z"/></svg>
-        Continue with TikTok
-      </button>
     </div>
 
     <div class="auth-divider">or sign in with username</div>
@@ -837,10 +834,6 @@ footer {
       <button class="social-btn google-btn" onclick="socialLogin('google')">
         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
         Register with Google
-      </button>
-      <button class="social-btn tiktok-btn" onclick="socialLogin('tiktok')">
-        <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.27 6.27 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.18 8.18 0 004.78 1.54V6.79a4.85 4.85 0 01-1.01-.1z"/></svg>
-        Register with TikTok
       </button>
     </div>
 
@@ -1137,8 +1130,46 @@ const firebaseConfig = {
 };
 
 // ADMIN WhatsApp number (receives notifications)
-// Replace with the actual admin WhatsApp number (with country code, no +)
 const ADMIN_WA_NUMBER = '256750162429';
+
+// ========================== EMAILJS CONFIG ==========================
+// Steps to set up (free):
+// 1. Go to https://www.emailjs.com and create a free account
+// 2. Add a service (Gmail) — connect your alexanderdeescar@gmail.com
+// 3. Create an email template — copy the Template ID
+// 4. Copy your Public Key from Account → API Keys
+// 5. Replace the values below with your actual IDs
+const EMAILJS_PUBLIC_KEY  = 'YOUR_PUBLIC_KEY';   // from EmailJS Account → API Keys
+const EMAILJS_SERVICE_ID  = 'YOUR_SERVICE_ID';   // from EmailJS → Email Services
+const EMAILJS_TEMPLATE_ID = 'YOUR_TEMPLATE_ID';  // from EmailJS → Email Templates
+const ADMIN_EMAIL = 'alexanderdeescar@gmail.com';
+
+// Initialize EmailJS
+emailjs.init(EMAILJS_PUBLIC_KEY);
+
+async function notifyAdminViaEmail(type, data) {
+  if (EMAILJS_PUBLIC_KEY === 'YOUR_PUBLIC_KEY') return; // skip if not configured yet
+  try {
+    let subject = '';
+    let body = '';
+    if (type === 'new_order') {
+      const items = data.items.map(i => `${i.category} ${i.sub} × ${i.qty} cartons = UGX ${i.total.toLocaleString()}`).join('\n');
+      subject = `🆕 New Order — ${data.id} from ${data.customer}`;
+      body = `NEW ORDER RECEIVED!\n\nOrder ID: ${data.id}\nCustomer: ${data.customer}\nPhone: ${data.phone}\nLocation: ${data.location}\n\nItems:\n${items}\n\nTotal: UGX ${data.total.toLocaleString()}\nPayment: ${data.payMethod}\nDate: ${data.date} at ${data.time}\nStatus: ${data.status}`;
+    } else if (type === 'new_registration') {
+      subject = `👤 New Customer — ${data.name} just registered`;
+      body = `NEW CUSTOMER REGISTERED!\n\nName: ${data.name}\nUsername: @${data.username}\nPhone: ${data.phone || '—'}\nLocation: ${data.location || '—'}\nJoined: ${data.joinDate}`;
+    }
+    await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+      to_email: ADMIN_EMAIL,
+      subject: subject,
+      message: body
+    });
+    console.log('Email notification sent');
+  } catch(e) {
+    console.error('Email notification failed:', e);
+  }
+}
 
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
@@ -1222,9 +1253,26 @@ function notifyAdminViaWhatsApp(type, data) {
   }
 }
 
+// Converts any phone format to international WhatsApp format
+function formatPhone(phone) {
+  if (!phone || phone === '—') return null;
+  // Remove spaces, dashes, plus signs, brackets
+  let p = phone.replace(/[\s\+\-\(\)]/g, '');
+  // If empty after cleaning, return null
+  if (!p || p.length < 7) return null;
+  // If starts with 0 and is 10 digits → Ugandan local (e.g. 0750162429)
+  if (p.startsWith('0') && p.length === 10) p = '256' + p.slice(1);
+  // If starts with 7 or 8 and is 9 digits → Ugandan no prefix (e.g. 750162429)
+  else if ((p.startsWith('7') || p.startsWith('8')) && p.length === 9) p = '256' + p;
+  // If starts with 256 and is 12 digits → already Ugandan international
+  // If starts with any other country code (1,44,254,27 etc) → leave as is
+  // Anything else with enough digits → leave as is, trust the user
+  return p;
+}
+
 function notifyCustomerViaWhatsApp(order, replyMsg, deliveryDate) {
-  const customerPhone = order.phone ? order.phone.replace(/[\s\+\-]/g, '') : null;
-  if (!customerPhone || customerPhone === '' || customerPhone === '—') {
+  const customerPhone = formatPhone(order.phone);
+  if (!customerPhone) {
     toast('No phone number for this customer');
     return;
   }
@@ -1238,9 +1286,7 @@ function openModal(id) { document.getElementById(id).classList.add('open'); }
 function closeModal(id) { document.getElementById(id).classList.remove('open'); }
 function switchModal(a, b) { closeModal(a); openModal(b); }
 
-// Social Login (Google / TikTok simulation)
-// NOTE: Google auth requires Firebase project configuration with Google provider enabled.
-// TikTok OAuth requires a TikTok developer app — shown as demo with custom flow.
+// Social Login (Google)
 async function socialLogin(provider) {
   if (provider === 'google') {
     try {
@@ -1281,10 +1327,6 @@ async function socialLogin(provider) {
         toast('Google sign-in failed. Please use username login below.');
       }
     }
-  } else if (provider === 'tiktok') {
-    // TikTok OAuth requires backend — demo simulation
-    toast('TikTok login: Contact admin to enable TikTok OAuth integration');
-    setTimeout(() => toast('Tip: Use username/password login in the meantime'), 3200);
   }
 }
 
@@ -1309,8 +1351,9 @@ async function completeSocialProfile() {
     state.pendingSocialUser = null;
     closeModal('socialCompleteModal');
     toast('Welcome, ' + userData.name + '! Account created! 🎉');
-    // Notify admin of new registration
+    // Notify admin of new registration via WhatsApp + Email
     setTimeout(() => notifyAdminViaWhatsApp('new_registration', userData), 1000);
+    setTimeout(() => notifyAdminViaEmail('new_registration', userData), 1000);
     afterLogin();
   } catch(e) {
     toast('Error saving profile. Check internet.');
@@ -1334,8 +1377,9 @@ async function doRegister() {
     await db.collection('users').doc(user).set(userData);
     closeModal('registerModal');
     toast('Account created! 🎉 Notifying admin...');
-    // Notify admin of new registration
+    // Notify admin of new registration via WhatsApp + Email
     setTimeout(() => notifyAdminViaWhatsApp('new_registration', userData), 800);
+    setTimeout(() => notifyAdminViaEmail('new_registration', userData), 800);
     openModal('loginModal');
   } catch(e) {
     toast('Error creating account. Check internet connection.');
@@ -1613,8 +1657,9 @@ async function confirmPayment() {
     document.getElementById('payFormArea').style.display = 'none';
     showPage('page-shop');
     toast('✅ Order placed! We will contact you shortly.');
-    // Notify admin via WhatsApp
+    // Notify admin via WhatsApp + Email
     setTimeout(() => notifyAdminViaWhatsApp('new_order', order), 1500);
+    setTimeout(() => notifyAdminViaEmail('new_order', order), 1500);
   } catch(e) {
     toast('Error saving order. Check internet and try again.');
     console.error(e);
@@ -1695,8 +1740,8 @@ function quickWaNotify(orderId) {
   const order = state.orders.find(o => o.id === orderId);
   if (!order) return;
   const msg = `📦 *EscarPolystore — Order Update*\n\nDear ${order.customer},\n\nYour order ${order.id} has been received and is being processed.\n\n💰 Total: UGX ${order.total.toLocaleString()}\n📅 Date: ${order.date}\n\nWe will contact you shortly with delivery details.\n\nThank you! 💚`;
-  const phone = order.phone ? order.phone.replace(/[\s\+\-]/g, '') : null;
-  if (!phone || phone === '—') { toast('No phone number for this customer'); return; }
+  const phone = formatPhone(order.phone);
+  if (!phone) { toast('No phone number for this customer'); return; }
   const encoded = encodeURIComponent(msg);
   window.open(`https://wa.me/${phone}?text=${encoded}`, '_blank');
 }
@@ -1709,7 +1754,7 @@ function renderCustomersTable() {
     <tbody>${state.users.map(u => {
       const userOrders = state.orders.filter(o => o.username === u.username);
       const spent = userOrders.reduce((s, o) => s + o.total, 0);
-      const phone = u.phone ? u.phone.replace(/[\s\+\-]/g, '') : '';
+      const phone = formatPhone(u.phone);
       return `<tr>
         <td>${u.name}</td>
         <td style="color:var(--gold-light)">@${u.username}</td>
